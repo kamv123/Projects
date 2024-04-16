@@ -1,0 +1,190 @@
+---
+title: "Iris Dataset"
+date: "2024-02-15"
+output: html_document
+---
+Note that the `echo = FALSE` parameter was added to the code chunk to prevent printing of the R code that generated the plot.
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+# Question 1 
+```{r Q1, echo = FALSE, include=FALSE}
+data(iris)
+iris
+help(iris)
+
+colnames(iris)
+rownames(iris)
+
+iris [10,]
+iris[,3]
+iris$Petal.Length
+subset_data = iris[10:20, 1:2]
+subset_data
+species_names = iris$Species
+```
+
+a.) The variables are: sepal length and width and petal length and width and species.
+For the 10th sample, the Sepal length is 4.9, Sepal width is 3.1, Petal length is 1.5, Petal Width is 0.1, and the Species is Setosa.
+```{r, echo = TRUE}
+iris[10,]
+```
+
+b.) There are 150 samples in this dataset.
+The different species that were measured are: Setosa, Versicolor, and Virginica.
+```{r}
+#num of samples
+num_rows = nrow(iris)
+num_rows
+#num of species
+unique(iris$Species)
+```
+
+# Question 2
+```{r}
+summary(iris)
+sd_cols = apply(iris[,1:4], 2, sd)
+sd_rows = apply(iris[,1:4], 1, sd)
+boxplot(iris[, 1:4], main = "Boxplot of Iris Variables")
+```
+```{r Q2}
+#standard deviation
+stdev = sd(iris$Sepal.Length)
+stdev
+
+#5 num summary
+sub_sum = summary(subset_data)
+print(sub_sum)
+sub_set = iris[10:20, "Sepal.Length"]
+standard_deviation = sd(sub_set)
+print(standard_deviation)
+```
+a.) There are 50 observations of each species.
+b.) Sepal.Length and Sepal.Width have medians smaller than their means.
+c.) The standard deviation of the sepal length measurements is 0.8280661.
+d.) The standard deviation of the sepal length measurements of this subset is 0.4665151.
+
+
+# Question 3
+```{r Q3}
+atomic_vec = c(1, 4, 3, 2, NA, 3.22, -44, 2, NA, 0, 22, 34)
+```
+
+a.) There are 8 positive numbers in the vector.
+b.) There is 1 negative number in the vector,
+c.) There is 1 zero in the vector.
+d.) There are 2 NAs in the vector.
+e.) There are 9 non-zero & NA numbers in the vector.
+f.) The sum of the positive numbers is 71.22.
+g.) The sum of the negative numbers is -44.
+```{r}
+#a
+pos_nums = sum(atomic_vec > 0, na.rm = TRUE)
+print(pos_nums)
+#b
+neg_nums = sum(atomic_vec < 0, na.rm = TRUE)
+print(neg_nums)
+#c
+zero_nums = sum(atomic_vec == 0, na.rm = TRUE)
+print(zero_nums)
+#d
+NA_nums = sum(is.na(atomic_vec))
+print(NA_nums)
+#e
+e = sum(atomic_vec != 0 & !is.na(atomic_vec))
+print(e)
+#f
+sums_pos = sum(atomic_vec[atomic_vec>0], na.rm = TRUE)
+print(sums_pos)
+#g
+sums_neg = sum(atomic_vec[atomic_vec<0], na.rm = TRUE)
+print(sums_neg)
+```
+
+# Question 4
+a.)
+```{r, include = FALSE, echo = FALSE}
+#create vector
+fib_vec = rep(0,1000)
+fib_vec[1] = 1
+fib_vec[2] = 1
+for (i in 3:1000) {
+  fib_vec[i] = fib_vec[i-1] + fib_vec[i-2]
+} 
+```
+b.) First 8 entries:  1,  1,  2,  3,  5, 8, 13, 21.
+    Last 8 entries:  1.497069e+207, 2.422308e+207, 3.919377e+207,6.341685e+207, 1.026106e+208, 1.660275e+208, 2.686381e+208, 4.346656e+208.
+```{r}
+first = fib_vec[1:8]
+print(first)
+last = tail(fib_vec,8)
+print(last)
+
+```
+
+c.)
+```{r}
+z_n = fib_vec[-length(fib_vec)] / fib_vec[-1]
+z_n999 = z_n[1:999]
+head(z_n999,10)
+
+```
+d.) 
+```{r}
+plot(z_n[1:10])
+abline(h = (1 + sqrt(5))/2)
+```
+
+e.) Initially there is a big change but the values become more stable and similar as the n-value increases.
+
+f.) This code is not meant for vectors. The syntax for vectors would need brackets.
+
+
+# Question 5
+
+```{r}
+#matrix 1
+fib_matrix1 = matrix(fib_vec, nrow = 100, ncol = 10, byrow = TRUE)
+#print(fib_matrix1)
+
+#matrix 2
+fib_matrix2 = t(fib_matrix1)
+#print(fib_matrix2)
+```
+
+```{r}
+#array
+fib_vector = numeric(100)
+fib_vector[1] = 1
+fib_vector[2] = 1
+for (i in 3:100){
+  fib_vector[i] = fib_vector[i-1] + fib_vector[i-2]
+}
+
+fib_matrices = array(fib_vector, dim = c(10,10,10))
+fib_stacked = apply(fib_matrices, MARGIN = c(1,3), FUN = c)
+
+```
+
+a.) The mean is: 4.816372e+36.
+```{r}
+mean_18th = mean(fib_matrix1[18, ])
+print(mean_18th)
+```
+
+b.) The standard deviation is: 7.582333e+15
+```{r}
+sd_8th = sd(fib_matrix2[, 8])
+print(sd_8th)
+
+```
+
+c.) The entry in the 5th row of the 2nd column of the 8th matrix in fib_array is: 610
+```{r}
+ans = fib_matrices[5,2,8]
+print(ans)
+```
+
+
