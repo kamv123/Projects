@@ -1,0 +1,238 @@
+---
+title: "Final_Project_Markdown"
+author: "Kameron V"
+date: "2024-04-18"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+## Dataset Initialization
+```{r dataset initialization}
+library(dplyr)
+library(ggplot2)
+data = read.csv("~/Downloads/NBA Stats.csv", sep = ";", header = FALSE)
+
+colnames(data) = data[1,]
+data = data[-1,]
+head(data,10)
+```
+
+##Remove Duplicate Data
+```{r remove duplicate data}
+duplicates_idx = duplicated(data$Player)
+data_new = data[!duplicates_idx,]
+head(data_new,10)
+summary(data_new)
+```
+
+
+## Age/Pts scored 
+```{r }
+library(ggplot2)
+library(dplyr)
+
+# Check for duplicate rows based on the "Player" column
+duplicates_idx = duplicated(data_new$Player)
+
+# Filter out duplicate rows
+data_new = data_new[!duplicates_idx,]
+
+# Define columns to convert to numeric
+numeric_columns = c("Age", "G", "GS", "MP", "FG", "FGA", "FG%", "3P", "3PA", "3P%", 
+                     "2P", "2PA", "2P%", "eFG%", "FT", "FTA", "FT%", "ORB", "DRB", 
+                     "TRB", "AST", "STL", "BLK", "TOV", "PF", "PTS")
+
+# Convert columns to numeric
+data_new[numeric_columns] = lapply(data_new[numeric_columns], as.numeric)
+
+
+
+library(dplyr)
+# Only include players age 23-35
+filtered_data <- data_new[data_new$Age >= 23 & data_new$Age <= 35, ]
+
+# Group by Age & Player then calculate avg pts for each player at each age
+average_points_by_age_player <- filtered_data %>%
+  group_by(Age, Player) %>%
+  summarise(Avg_Points = mean(PTS))
+
+# Find the player with the highest avg pts for each age
+top_players_by_age <- average_points_by_age_player %>%
+  group_by(Age) %>%
+  filter(Avg_Points == max(Avg_Points))
+
+print(top_players_by_age)
+
+```
+
+```{r}
+library(dplyr)
+
+# Filter the data to include only players aged 23 to 35 and who played at least 10 minutes
+filtered_data <- data_new[data_new$Age >= 23 & data_new$Age <= 35 & data_new$MP >= 10, ]
+
+# Calculate the highest player's points for each age
+highest_points_by_age <- filtered_data %>%
+  group_by(Age) %>%
+  summarise(Highest_Points = max(PTS))
+
+# Calculate the average points for each age (considering only players who played at least 10 minutes)
+average_points_by_age <- filtered_data %>%
+  group_by(Age) %>%
+  summarise(Avg_Points = round(mean(PTS), 1))
+
+# Merge the two datasets for comparison
+comparison <- merge(highest_points_by_age, average_points_by_age, by = "Age")
+
+# Print the comparison
+print(comparison)
+
+```
+
+```{r}
+library(ggplot2)
+
+# Assuming you have dataframes highest_ppg_by_age and average_points_by_age with Age and PPG columns
+
+# Create line plot for highest PPG by age
+ggplot() +
+  geom_line(data = highest_points_by_age, aes(x = Age, y = Highest_Points, color = "Highest PPG")) +
+  geom_line(data = average_points_by_age, aes(x = Age, y = Avg_Points, color = "Average PPG")) +
+  labs(title = "Highest vs. Average PPG by Age",
+       x = "Age",
+       y = "PPG",
+       color = "Legend") +
+  scale_color_manual(values = c("red", "blue")) +
+  theme_minimal()
+
+
+```
+
+
+##TS%
+```{r}
+#TS% = (PTS) / 2*(FGA + (0.44*FTA))
+
+# Top 5 PPG players
+sorted_data = data_new[order(-data_new$PTS), ]
+top_players = sorted_data[1:5, ]
+
+# Calculate the formula for the top 5 players
+TS_val = ((top_players$PTS / (2 * (top_players$FGA + (0.44 * top_players$FTA)))) * 100)
+
+# TS%
+for(i in 1:5) {
+  cat(top_players[i, "Player"], ": ", round(TS_val[i],1),"%", "\n")
+}
+
+```
+
+
+
+
+#Does Position Affect TS%?
+```{r}
+# Only PG and C positions
+pg_players = data_new[data_new$Pos == "PG", ]
+c_players = data_new[data_new$Pos == "C", ]
+
+# Calculate the TS%
+ts_percent_pg = (pg_players$PTS) / (2 * (pg_players$FGA + (0.44 * pg_players$FTA))) * 100
+ts_percent_c = (c_players$PTS) / (2 * (c_players$FGA + (0.44 * c_players$FTA))) * 100
+
+# Calculate the avg TS% 
+avg_ts_percent_pg = mean(ts_percent_pg, na.rm = TRUE)
+avg_ts_percent_c = mean(ts_percent_c, na.rm = TRUE)
+
+cat("Average TS% for PG players:", avg_ts_percent_pg, "\n")
+cat("Average TS% for C players:", avg_ts_percent_c, "\n")
+
+```
+
+#Boxplot
+```{r}
+library(ggplot2)
+
+# df
+position_data = data.frame(
+  Position = c(rep("PG", length(ts_percent_pg)), rep("C", length(ts_percent_c))),
+  TS_Percent = c(ts_percent_pg, ts_percent_c)
+)
+
+# box plot
+ggplot(position_data, aes(x = Position, y = TS_Percent, fill = Position)) +
+  geom_boxplot(outlier.shape = NA) +
+  labs(
+    title = "Comparison of True Shooting Percentage (TS%) by Position",
+    x = "Position",
+    y = "TS%"
+  ) +
+  theme_minimal()
+
+
+
+```
+
+
+
+
+
+#Best PGs
+```{r}
+# Top 10 PGs in Player Efficiency Rating (PER)
+selected_players = c("Shai Gilgeous-Alexander", "Luka Don?i?", "Jalen Brunson", "Tyrese Haliburton", 
+                      "Kyrie Irving", "T.J. McConnell", "LaMelo Ball", "Jamal Murray", 
+                      "Stephen Curry", "Trae Young")
+
+selected_data = data_new[data_new$Player %in% selected_players, ]
+
+# Replace Don?i?" with Doncic
+selected_data$Player = gsub("Luka Don\\?i\\?", "Luka Doncic", selected_data$Player)
+print(selected_data)
+
+
+# Calculate TS_val
+selected_data$TS_val = (selected_data$PTS / (2 * (selected_data$FGA + (0.44 * selected_data$FTA)))) * 100
+
+selected_data$points_TS = ifelse(selected_data$TS_val < 57, -1, ifelse(selected_data$TS_val > 57, 1, 0))
+
+points_scoring = selected_data$PTS
+points_assists = 2 * selected_data$AST
+points_turnovers = -2 * selected_data$TOV
+points_FT = ifelse(selected_data$`FT%` > 0.85, 1, -1)
+points_3P = ifelse(selected_data$`3P%` > 0.35, 1, -1)
+total_points = points_scoring + points_assists + points_turnovers + points_FT + points_3P + selected_data$points_TS
+
+player_points = data.frame(Player = selected_data$Player, PG_Rating = total_points)
+
+player_points = player_points[order(-player_points$PG_Rating), ]
+
+print(player_points)
+
+
+
+```
+
+
+
+```{r}
+library(ggplot2)
+
+# Assuming you already have the dataframe player_points with the PG_Rating column
+
+# Create bar plot
+ggplot(player_points, aes(x = Player, y = PG_Rating)) +
+  geom_bar(stat = "identity", fill = "lightgreen", width = 0.5) +
+  labs(title = "                                    Rating for Efficient PG's",
+       x = "Player",
+       y = "PG Rating") +
+  theme(axis.text.x = element_text(angle = 45, hjust = 1))  # Rotate x-axis labels for better readability
+
+```
+
+
+
+
