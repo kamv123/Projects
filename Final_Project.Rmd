@@ -10,7 +10,7 @@ knitr::opts_chunk$set(echo = TRUE)
 ```
 
 ## Dataset Initialization
-```{r dataset initialization}
+{r dataset initialization}
 library(dplyr)
 library(ggplot2)
 data = read.csv("~/Downloads/NBA Stats.csv", sep = ";", header = FALSE)
@@ -18,7 +18,7 @@ data = read.csv("~/Downloads/NBA Stats.csv", sep = ";", header = FALSE)
 colnames(data) = data[1,]
 data = data[-1,]
 head(data,10)
-```
+
 
 ##Remove Duplicate Data
 ```{r remove duplicate data}
