@@ -1,2 +1,2 @@
 # Projects
-This Repo contains multiple projects I have worked on in and outside of college during my time at the University of San Francisco.
+This repository showcases projects I am working on while pursuing my Bachelor of Science in Data Science program at the University of San Francisco.
