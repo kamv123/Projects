@@ -1,0 +1,3 @@
+[submodule "Gurmukhi_OCR"]
+	path = Gurmukhi_OCR
+	url = git@github.com:kamv123/Gurmukhi_OCR.git
